@@ -1,36 +1,81 @@
-<!DOCTYPE html>
 <html>
 <head>
     <title>Kingdom's Last Stand</title>
     <style>
-        body { margin: 0; }
-        canvas { background: #000; display: block; margin: auto; }
+        body { font-family: Arial, sans-serif; }
+        #shop { display: none; }
+        .enemy { position: absolute; width: 50px; height: 50px; background-color: red; }
+        .castle { position: absolute; width: 100px; height: 100px; background-color: blue; bottom: 0; left: 50%; transform: translateX(-50%); }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <h1>Kingdom's Last Stand</h1>
+    <div id="castle" class="castle"></div>
+    <div id="shop">
+        <h2>Shop</h2>
+        <button onclick="buyUpgrade()">Buy Upgrade</button>
+    </div>
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let player = { x: 100, y: 100, size: 50, color: 'red' };
+        let wave = 0;
+        let enemies = [];
+        let enemyHP = 100;
+        let castleHealth = 1000;
 
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.size, player.size);
-            requestAnimationFrame(gameLoop);
+        function startGame() {
+            wave = 0;
+            newWave();
         }
 
-        document.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case 'ArrowUp': player.y -= 10; break;
-                case 'ArrowDown': player.y += 10; break;
-                case 'ArrowLeft': player.x -= 10; break;
-                case 'ArrowRight': player.x += 10; break;
-            }
-        });
+        function newWave() {
+            wave++;
+            enemyHP += 20 * wave;
+            spawnEnemies(wave);
+        }
 
-        gameLoop();
+        function spawnEnemies(wave) {
+            for (let i = 0; i < wave; i++) {
+                let enemy = document.createElement('div');
+                enemy.className = 'enemy';
+                enemy.style.top = '0px';
+                enemy.style.left = Math.random() * window.innerWidth + 'px';
+                document.body.appendChild(enemy);
+                enemies.push(enemy);
+                moveEnemy(enemy);
+            }
+        }
+
+        function moveEnemy(enemy) {
+            let posY = 0;
+            let interval = setInterval(() => {
+                if (posY < window.innerHeight - 100) {
+                    posY += 1;
+                    enemy.style.top = posY + 'px';
+                } else {
+                    clearInterval(interval);
+                    castleHealth -= enemyHP;
+                    checkGameOver();
+                    enemy.remove();
+                }
+            }, 100);
+        }
+
+        function checkGameOver() {
+            if (castleHealth <= 0) {
+                alert('Game Over!');
+                clearEnemies();
+            }
+        }
+
+        function clearEnemies() {
+            enemies.forEach(enemy => enemy.remove());
+            enemies = [];
+        }
+
+        function buyUpgrade() {
+            // Implement upgrade logic here
+        }
+
+        startGame();
     </script>
 </body>
 </html>
